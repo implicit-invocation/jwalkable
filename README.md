@@ -1,5 +1,6 @@
 # jwalkable
-Easy 2D polygonal pathfinding for Java.
+Easy 2D polygonal pathfinding for Java.  
+Based on [hxDaedalus](https://github.com/hxDaedalus/hxDaedalus) (haxe port of [daedalus-lib](https://github.com/totologic/daedalus-lib)) and [hxPixels](https://github.com/azrafe7/hxPixels).
 
 ![Demo](images/jwalkable.gif?raw=true "demo")
 
