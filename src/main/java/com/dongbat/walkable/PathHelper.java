@@ -21,19 +21,26 @@ import hxDaedalus.ai.PathFinder;
 import hxDaedalus.data.Mesh;
 import hxDaedalus.data.Obstacle;
 import hxDaedalus.factories.RectMesh;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Wrapper for hxDaedalus
  * @author tao
  */
 public class PathHelper {
-
   private final Mesh mesh;
   private final EntityAI entity;
   private final PathFinder pathFinder;
   private final Array path;
+  private final List<Obstacle> obstacles = new ArrayList<Obstacle>();
 
+  /**
+   * Constructs a PathFinder with the given world width and world height
+   * @param w the world width
+   * @param h the world height
+   */
   public PathHelper(float w, float h) {
     mesh = RectMesh.buildRectangle(w, h);
     entity = new EntityAI();
@@ -49,8 +56,7 @@ public class PathHelper {
 
   public Obstacle addPolyline(float[] vertices, float x, float y) {
     if (vertices.length < 4) {
-      System.out.println("Polylines must contain at least 2 points.");
-      return null;
+      throw new IllegalArgumentException("Polylines must contain at least 2 points.");
     }
     Obstacle object = new Obstacle();
     Array array = new Array();
@@ -73,6 +79,8 @@ public class PathHelper {
     object.set_x(x);
     object.set_y(y);
     mesh.insertObject(object);
+    obstacles.add(object);
+
     return object;
   }
 
@@ -82,8 +90,7 @@ public class PathHelper {
 
   public Obstacle addPolygon(float[] vertices, float x, float y) {
     if (vertices.length < 6) {
-      System.out.println("Polygons must contain at least 3 points.");
-      return null;
+      throw new IllegalArgumentException("Polygons must contain at least 3 points.");
     }
     Obstacle object = new Obstacle();
     Array array = new Array();
@@ -104,6 +111,7 @@ public class PathHelper {
     object.set_x(x);
     object.set_y(y);
     mesh.insertObject(object);
+    obstacles.add(object);
 
     return object;
   }
@@ -139,12 +147,27 @@ public class PathHelper {
     object.set_x(x);
     object.set_y(y);
     mesh.insertObject(object);
+    obstacles.add(object);
 
     return object;
   }
 
+  /**
+   * Removes the given obstacle
+   */
   public void removeObstacle(Obstacle obstacle) {
     mesh.deleteObject(obstacle);
+    obstacles.remove(obstacle);
+  }
+
+  /**
+   * Removes all obstacles
+   */
+  public void clearObstacles(){
+    for (Obstacle obstacle : obstacles){
+      removeObstacle(obstacle);
+    }
+    obstacles.clear();
   }
 
   private void doFindPath(float fromX, float fromY, float toX, float toY, float radius) {
@@ -155,10 +178,13 @@ public class PathHelper {
       pathFinder.findPath(toX, toY, path);
     } catch (Exception e) {
       path.splice(0, path.length);
-      System.out.println(e.getMessage());
+      throw new PathfinderException(e);
     }
   }
 
+  /**
+   * @throws PathfinderException occasionally, if there's an internal problem in hxDaedalus
+   */
   public float[] findPath(float fromX, float fromY, float toX, float toY, float radius) {
     doFindPath(fromX, fromY, toX, toY, radius);
 
@@ -170,6 +196,9 @@ public class PathHelper {
     return result;
   }
 
+  /**
+   * @throws PathfinderException occasionally, if there's an internal problem in hxDaedalus
+   */
   public int findPath(float fromX, float fromY, float toX, float toY, float radius, float[] result) {
     doFindPath(fromX, fromY, toX, toY, radius);
 
@@ -179,6 +208,9 @@ public class PathHelper {
     return path.length;
   }
 
+  /**
+   * @throws PathfinderException occasionally, if there's an internal problem in hxDaedalus
+   */
   public void findPath(float fromX, float fromY, float toX, float toY, float radius, List<Float> result) {
     doFindPath(fromX, fromY, toX, toY, radius);
 
@@ -188,6 +220,9 @@ public class PathHelper {
     }
   }
 
+  /**
+   * @throws PathfinderException occasionally, if there's an internal problem in hxDaedalus
+   */
   public void findPath(float fromX, float fromY, float toX, float toY, float radius, FloatArray result) {
     doFindPath(fromX, fromY, toX, toY, radius);
 
