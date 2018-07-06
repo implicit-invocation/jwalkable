@@ -15,7 +15,7 @@
  */
 package com.dongbat.walkable;
 
-class PathfinderException extends RuntimeException {
+public class PathfinderException extends RuntimeException {
     PathfinderException(String s){
     	super(s);
     }
