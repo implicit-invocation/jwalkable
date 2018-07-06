@@ -21,6 +21,8 @@ import hxDaedalus.ai.PathFinder;
 import hxDaedalus.data.Mesh;
 import hxDaedalus.data.Obstacle;
 import hxDaedalus.factories.RectMesh;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +34,7 @@ public class PathHelper {
   private final EntityAI entity;
   private final PathFinder pathFinder;
   private final Array path;
+  private final List<Obstacle> obstacles = new ArrayList<Obstacle>();
 
   /**
    * Constructs a PathFinder with the given world width and world height
@@ -76,6 +79,8 @@ public class PathHelper {
     object.set_x(x);
     object.set_y(y);
     mesh.insertObject(object);
+    obstacles.add(object);
+
     return object;
   }
 
@@ -106,6 +111,7 @@ public class PathHelper {
     object.set_x(x);
     object.set_y(y);
     mesh.insertObject(object);
+    obstacles.add(object);
 
     return object;
   }
@@ -141,12 +147,27 @@ public class PathHelper {
     object.set_x(x);
     object.set_y(y);
     mesh.insertObject(object);
+    obstacles.add(object);
 
     return object;
   }
 
+  /**
+   * Removes the given obstacle
+   */
   public void removeObstacle(Obstacle obstacle) {
     mesh.deleteObject(obstacle);
+    obstacles.remove(obstacle);
+  }
+
+  /**
+   * Removes all obstacles
+   */
+  public void clearObstacles(){
+    for (Obstacle obstacle : obstacles){
+      removeObstacle(obstacle);
+    }
+    obstacles.clear();
   }
 
   private void doFindPath(float fromX, float fromY, float toX, float toY, float radius) {
