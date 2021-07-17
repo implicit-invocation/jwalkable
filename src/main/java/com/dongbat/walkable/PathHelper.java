@@ -35,6 +35,7 @@ public class PathHelper {
   private final PathFinder pathFinder;
   private final Array path;
   private final List<Obstacle> obstacles = new ArrayList<Obstacle>();
+  private int scale;
 
   /**
    * Constructs a PathFinder with the given world width and world height
@@ -48,6 +49,19 @@ public class PathHelper {
     pathFinder.set_mesh(mesh);
     pathFinder.entity = entity;
     path = new Array();
+    scale = 1;
+  }
+
+  /** If adding obstacles to PathHelper gets stuck in an infinite loop, try using a larger scale.
+   * Your obstacle details may be too small. */
+  public PathHelper(float w, float h, int scale) {
+    mesh = RectMesh.buildRectangle(w * scale, h * scale);
+    entity = new EntityAI();
+    pathFinder = new PathFinder();
+    pathFinder.set_mesh(mesh);
+    pathFinder.entity = entity;
+    path = new Array();
+    this.scale = scale;
   }
 
   public Obstacle addPolyline(float[] vertices) {
@@ -63,8 +77,8 @@ public class PathHelper {
     object.set_coordinates(array);
     float prevX = 0, prevY = 0;
     for (int i = 0; i < vertices.length; i += 2) {
-      float vx = vertices[i];
-      float vy = vertices[i + 1];
+      float vx = vertices[i] * scale;
+      float vy = vertices[i + 1] * scale;
 
       if (i > 0) {
         array.push(prevX);
@@ -76,8 +90,8 @@ public class PathHelper {
       prevX = vx;
       prevY = vy;
     }
-    object.set_x(x);
-    object.set_y(y);
+    object.set_x(x * scale);
+    object.set_y(y * scale);
     mesh.insertObject(object);
     obstacles.add(object);
 
@@ -95,10 +109,10 @@ public class PathHelper {
     Obstacle object = new Obstacle();
     Array array = new Array();
     object.set_coordinates(array);
-    float prevX = vertices[vertices.length - 2], prevY = vertices[vertices.length - 1];
+    float prevX = vertices[vertices.length - 2] * scale, prevY = vertices[vertices.length - 1] * scale;
     for (int i = 0; i < vertices.length; i += 2) {
-      float vx = vertices[i];
-      float vy = vertices[i + 1];
+      float vx = vertices[i] * scale;
+      float vy = vertices[i + 1] * scale;
 
       array.push(prevX);
       array.push(prevY);
@@ -108,8 +122,8 @@ public class PathHelper {
       prevX = vx;
       prevY = vy;
     }
-    object.set_x(x);
-    object.set_y(y);
+    object.set_x(x * scale);
+    object.set_y(y * scale);
     mesh.insertObject(object);
     obstacles.add(object);
 
@@ -117,6 +131,11 @@ public class PathHelper {
   }
 
   public Obstacle addRect(float x, float y, float w, float h) {
+    x *= scale;
+    y *= scale;
+    w *= scale;
+    h *= scale;
+
     Obstacle object = new Obstacle();
     Array array = new Array();
     array.push(0);
@@ -171,11 +190,11 @@ public class PathHelper {
   }
 
   private void doFindPath(float fromX, float fromY, float toX, float toY, float radius) {
-    entity.set_radius(radius);
-    entity.x = fromX;
-    entity.y = fromY;
+    entity.set_radius(radius * scale);
+    entity.x = fromX * scale;
+    entity.y = fromY * scale;
     try {
-      pathFinder.findPath(toX, toY, path);
+      pathFinder.findPath(toX * scale, toY * scale, path);
     } catch (Exception e) {
       path.splice(0, path.length);
       throw new PathfinderException(e);
@@ -191,7 +210,7 @@ public class PathHelper {
     float[] result = new float[path.length];
 
     for (int i = 0; i < path.length; i++) {
-      result[i] = ((Double) path.__get(i)).floatValue();
+      result[i] = ((Double) path.__get(i)).floatValue() / scale;
     }
     return result;
   }
@@ -203,7 +222,7 @@ public class PathHelper {
     doFindPath(fromX, fromY, toX, toY, radius);
 
     for (int i = 0; i < path.length; i++) {
-      result[i] = ((Double) path.__get(i)).floatValue();
+      result[i] = ((Double) path.__get(i)).floatValue() / scale;
     }
     return path.length;
   }
@@ -216,7 +235,7 @@ public class PathHelper {
 
     result.clear();
     for (int i = 0; i < path.length; i++) {
-      result.add(((Double) path.__get(i)).floatValue());
+      result.add(((Double) path.__get(i)).floatValue() / scale);
     }
   }
 
@@ -228,7 +247,7 @@ public class PathHelper {
 
     result.clear();
     for (int i = 0; i < path.length; i++) {
-      result.add(((Double) path.__get(i)).floatValue());
+      result.add(((Double) path.__get(i)).floatValue() / scale);
     }
   }
 }
